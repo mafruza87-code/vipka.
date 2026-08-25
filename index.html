@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VIP Сервер — MM2</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#172033}
+header{background:#fff;border-bottom:1px solid #e4e8ef}.nav{max-width:1050px;margin:auto;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:20px;font-weight:800}.logo span{color:#2563eb}
+button{border:0;border-radius:11px;padding:12px 18px;font-weight:700;cursor:pointer}.blue{background:#2563eb;color:#fff}
+main{max-width:1050px;margin:auto;padding:50px 20px}.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:25px;align-items:center}
+h1{font-size:46px;margin:10px 0 15px}.lead{font-size:18px;color:#687386;line-height:1.6}
+.card{background:#fff;border:1px solid #e4e8ef;border-radius:20px;padding:25px;box-shadow:0 12px 35px #1b315b10}
+section{margin-top:45px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.item p{color:#687386;line-height:1.5}.badge{display:inline-block;background:#e8f0ff;color:#1d4ed8;padding:8px 12px;border-radius:99px;font-weight:700}
+form{display:grid;gap:14px}label{font-weight:700;font-size:14px}input,select,textarea{width:100%;margin-top:7px;padding:13px;border:1px solid #dfe4ec;border-radius:10px;font:inherit}textarea{min-height:90px}
+.notice{padding:13px;background:#eef5ff;border:1px solid #d6e6ff;border-radius:11px;color:#31537d;font-size:14px}.status{font-weight:700;margin-top:15px}
+footer{text-align:center;color:#687386;padding:35px}
+@media(max-width:720px){.hero,.grid{grid-template-columns:1fr}h1{font-size:37px}}
+</style>
+</head>
+<body>
+<header><div class="nav"><div class="logo">VIP <span>Сервер</span></div><button class="blue" onclick="location.href='#form'">Создать заявку</button></div></header>
+<main>
+<div class="hero">
+<div><div class="badge">Roblox • MM2</div><h1>VIP-сервер на 1 год</h1><p class="lead">Оставь заявку на получение VIP-сервера. После отправки она автоматически появится в нашем Discord-канале для проверки.</p><button class="blue" onclick="location.href='#form'">Подать заявку</button></div>
+<div class="card"><h2>Как работает?</h2><p>1. Заполняешь форму.</p><p>2. Заявка отправляется в Discord.</p><p>3. Администратор проверяет заявку.</p></div>
+</div>
+<section><h2>Процесс</h2><div class="grid">
+<div class="card item"><h3>📋 Заявка</h3><p>Укажи Roblox и Discord.</p></div>
+<div class="card item"><h3>📩 Discord</h3><p>Заявка автоматически приходит в канал.</p></div>
+<div class="card item"><h3>✅ Проверка</h3><p>Администратор связывается с игроком.</p></div>
+</div></section>
+<section id="form"><div class="card"><h2>Создать заявку</h2>
+<div class="notice">Не вводи пароль Roblox или Discord. Сайт запрашивает только данные, необходимые для заявки.</div><br>
+<form onsubmit="sendRequest(event)">
+<label>Roblox ник<input id="roblox" required maxlength="50" placeholder="Player123"></label>
+<label>Discord<input id="discord" required maxlength="80" placeholder="@username"></label>
+<label>Что отдаёшь<select id="give" required><option value="">Выбери</option><option>Игровой предмет</option><option>VIP/другая игровая услуга</option><option>Другое</option></select></label>
+<label>Что хочешь получить<select id="get" required><option value="">Выбери</option><option>VIP-сервер на 1 год</option><option>Другое</option></select></label>
+<label>Комментарий<textarea id="comment" maxlength="500" placeholder="Дополнительная информация"></textarea></label>
+<button class="blue" type="submit">Отправить заявку</button>
+</form><p id="status" class="status"></p>
+</div></section>
+</main><footer>VIP Сервер • Roblox MM2</footer>
+<script>
+const WEBHOOK_URL="https://discord.com/api/webhooks/1541422841998876674/iRthTHbNNahUudLqQxDcxROSefmOLVMoA-NEc77yjSBXC0AJCbJP-zJQ0fZmKNOsy--c";
+
+async function sendRequest(e){
+ e.preventDefault();
+ const status=document.getElementById("status");
+ status.textContent="Отправляем заявку...";
+ status.style.color="#31537d";
+
+ const payload = {
+    embeds: [{
+        title: "💎 Новая заявка на VIP (MM2)",
+        color: 2450411,
+        fields: [
+            { name: "🎮 Roblox ник:", value: roblox.value.trim() || "Не указан", inline: true },
+            { name: "💬 Discord:", value: discord.value.trim() || "Не указан", inline: true },
+            { name: "🎁 Что отдаёт:", value: give.value, inline: false },
+            { name: "🏆 Что хочет:", value: get.value, inline: false },
+            { name: "📝 Комментарий:", value: comment.value.trim() || "Нет", inline: false }
+        ],
+        footer: { text: "MM2 VIP Request System" },
+        timestamp: new Date().toISOString()
+    }]
+ };
+
+ try{
+  const r = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+  });
+  
+  if(r.ok || r.status === 204){
+      status.textContent = "✅ Заявка успешно отправлена в Discord!";
+      status.style.color = "green";
+      e.target.reset();
+  } else {
+      throw new Error();
+  }
+ } catch(err){
+    status.textContent = "❌ Не удалось отправить заявку. Попробуйте еще раз.";
+    status.style.color = "red";
+ }
+}
+</script>
+</body></html>
+  
